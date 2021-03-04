@@ -3,24 +3,26 @@ import pandas as pd
 from requests_html import HTML
 
 
-lender_name = "grander-home-loans-inc"
+# lender_name = "grander-home-loans-inc"
 
-lender_product_type = "mortgage"
+# lender_product_type = "mortgage"
 
-lender_url_id = "58426567"
+# lender_url_id = "58426567"
 
 url = "https://www.lendingtree.com/reviews/{loan_type}/{lender}/{lender_id}"
 
 review_list = []
 
-review_headers = ["Lender", "Loan Type", "Review Title", "Stars", "Recommendation", "Review", "Reviewer", "Address", "Date"]
+review_headers = ["Lender", "Loan Type", "Review Title", "Stars", "Review", "Reviewer", "Address", "Date"]
 
 
-def get_review_page(lender, lender_id, url):
-    html_text = fetch_review_html(url)
+def get_review_page(lender_product_type, lender_name, lender_url_id,):
+    formated_url = url.format(loan_type=lender_product_type, lender=lender_name, lender_id=lender_url_id)
+    html_text = fetch_review_html(formated_url)
     if html_text == "":
         return "failed to scrape reviews with the submitted fields"
-    review_html_to_text_list(html_text)
+    reviews = review_html_to_text_list(html_text, lender_product_type, lender_name)
+    return reviews
 
 
 def fetch_review_html(url):
@@ -30,7 +32,7 @@ def fetch_review_html(url):
         return html_text
     return ""
 
-def review_html_to_text_list(html_text):
+def review_html_to_text_list(html_text, lender_product_type, lender_name):
     
     r_html = HTML(html=html_text)
     review_html = r_html.find(".lenderReviews")
@@ -54,7 +56,9 @@ def review_html_to_text_list(html_text):
         star_rec = stars_and_rec.split("stars")
 
         review_fields.append(star_rec[0])
-        review_fields.append(star_rec[1])
+
+        #fuck recommended
+        # review_fields.append(star_rec[1])
 
         review_text = review.find(".reviewText")
 
@@ -72,7 +76,6 @@ def review_html_to_text_list(html_text):
 
         review_list.append(review_fields)
 
-    # df = pd.DataFrame(review_list, columns=review_headers)
-    # df.to_csv('reviews.csv', index=False)
-
-get_reviews(lender_name, lender_url_id)
+    df = pd.DataFrame(review_list, columns=review_headers)
+    r = df.to_dict()
+    return r
