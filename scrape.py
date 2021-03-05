@@ -15,15 +15,15 @@ parse_html_error = "failed to parse the review html from the full scraped html"
 parse_text_error = "failed to parse text for field {field}"
 
 def get_review_list(submitted_url):
-    html_text = fetch_review_html(submitted_url)
+    html_text, code = fetch_review_html(submitted_url)
 
     if html_text == "":
         return fetch_html_error.format(url=submitted_url)
 
     reviews = parse_review_html(html_text)
 
-    if reviews == "":
-        return parse_html_error
+    if reviews == parse_html_error:
+        return reviews
 
     review_list = review_html_to_text_list(reviews)
 
@@ -36,18 +36,18 @@ def fetch_review_html(url):
     r = requests.get(url)
     if r.status_code == 200:
         html_text = r.text
-        return html_text
-    return ""
+        return html_text, r.status_code
+    return "", r.status_code
 
 def parse_review_html(html_text):
     r_html = HTML(html=html_text)
     review_html = r_html.find(".lenderReviews")
     if review_html == -1:
-        return ""
+        return parse_html_error
     review_body = review_html[0]
     reviews = review_body.find(".mainReviews")
     if reviews == -1:
-        return ""
+        return parse_html_error
     return reviews
 
 def review_html_to_text_list(reviews):
