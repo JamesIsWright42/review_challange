@@ -1,4 +1,4 @@
-from flask import Flask, render_template, make_response, request
+from flask import Flask, render_template, request
 from scrape import get_review_list
 
 app = Flask(__name__)
