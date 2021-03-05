@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, make_response
 from flask import request
 from scrape import get_review_list
 
@@ -22,7 +22,8 @@ def get_reviews(loan_type, lender, lender_id):
 
 @app.errorhandler(404)
 def not_found_error(error):
-    return render_template('404.html'),404
+    response = make_response(render_template('404.html'),404)
+    return response
 
 @app.errorhandler(500)
 def internal_error(error):
