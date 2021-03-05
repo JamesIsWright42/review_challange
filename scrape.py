@@ -12,7 +12,7 @@ fetch_html_error = "failed to scrape reviews with the submitted url. URL: {url}"
 
 parse_html_error = "failed to parse the review html from the full scraped html"
 
-parse_text_error = "failed to parse text for field {field}"
+parse_text_error = "failed to parse text for field: {field}"
 
 def get_review_list(submitted_url):
     html_text, code = fetch_review_html(submitted_url)

@@ -12,6 +12,8 @@ requests = "*"
 requests-html = "*"
 pandas = "*"
 pytest = "*"
+pytest-vcr = "*"
+vcrpy = "*"
 
 [dev-packages]
 

@@ -2,10 +2,11 @@
 
 # Run Instructions
 
-# To start the server, in the command line run "./run1.sh"
-# This will start the server listening at http://127.0.0.1:8000/form
+# This program utilizes pipenv to manage dependancies 
+# To start the server, navigate to the coding challenge folder in your terminal and in the command line run "./run1.sh"
+# This will start the server listening at http://127.0.0.1:8000
 
-# Traveling to http://127.0.0.1:8000/form submits a get request to the API and loads a form in your browser that accepts a string. 
+# Traveling to http://127.0.0.1:8000/form submits a GET request to the API and loads a form in your browser that accepts a string. 
 
 # Entering a string submits a POST request to the API and calls get_review_list()
 
@@ -22,3 +23,7 @@
 # review_html_to_text_list takes the list of reviews and itirates over them, utilizing small functions to parse out the fields that are pertinent to this challenge.  Once it has parsed the whole list, it returns a new list of the parsed review fields.
 
 # get_review_list takes the parsed list of reviews from review_html_to_text_list and turns them into a dict and then returns the dict to the handler which serves it to the users webpage in JSon
+
+# Test Instructions
+
+# To run the tests, Navigate to the coding challenge folder on your machine and run pytest

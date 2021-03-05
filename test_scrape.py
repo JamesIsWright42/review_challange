@@ -1,10 +1,18 @@
 import pytest
-
-from scrape import fetch_review_html, parse_review_html, parse_html_error
-from test_structures import parse_review_html_resp
-from test_html import test_html_resp
+import pytest_vcr
+from urllib import request
 
 
+
+from scrape import fetch_review_html, parse_review_html
+
+
+
+
+@pytest.mark.vcr()
+def test_iana():
+    response = request.urlopen('http://www.iana.org/domains/reserved').read()
+    assert b'https://www.lendingtree.com/reviews/personal/first-midwest-bank/52903183' in response
 
 
 def test_fetch_review_html():
