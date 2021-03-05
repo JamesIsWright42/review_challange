@@ -1,0 +1,12 @@
+Must do
+
+1. consolidate the for loop with parsing functions
+2. add error handling for each function call in my orchestrator
+3. add status code handling in my route 
+4. add testing file
+---------------------------------
+
+that sweet sweet country style sausage gravy
+1. add a database and some sql calls
+2. make it grab all reviews not just the first page
+3. do something with the information 

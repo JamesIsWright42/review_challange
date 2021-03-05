@@ -2,27 +2,36 @@ import requests
 import pandas as pd
 from requests_html import HTML
 
-
-# lender_name = "grander-home-loans-inc"
-
-# lender_product_type = "mortgage"
-
-# lender_url_id = "58426567"
-
 url = "https://www.lendingtree.com/reviews/{loan_type}/{lender}/{lender_id}"
 
 review_list = []
 
 review_headers = ["Lender", "Loan Type", "Review Title", "Stars", "Review", "Reviewer", "Address", "Date"]
 
+fetch_html_error = "failed to scrape reviews with the submitted fields. Loan Type: {loan_type}, Lender: {lender}, Lender ID: {lender_id}"
+
+parse_html_error = "failed to parse the review html from the full scraped html"
+
+parse_text_error = "failed to parse text for field {field}"
 
 def get_review_page(lender_product_type, lender_name, lender_url_id,):
     formated_url = url.format(loan_type=lender_product_type, lender=lender_name, lender_id=lender_url_id)
+
     html_text = fetch_review_html(formated_url)
+
     if html_text == "":
-        return "failed to scrape reviews with the submitted fields"
-    reviews = review_html_to_text_list(html_text, lender_product_type, lender_name)
-    return reviews
+        return fetch_html_error.format(loan_type=lender_product_type, lender=lender_name, lender_id=lender_url_id)
+
+    reviews = parse_review_html(html_text)
+
+    if reviews == "":
+        return parse_html_error
+
+    review_list = review_html_to_text_list(reviews, lender_product_type, lender_name)
+
+    df = pd.DataFrame(review_list, columns=review_headers)
+    review_dict = df.to_dict()
+    return review_dict
 
 
 def fetch_review_html(url):
@@ -32,13 +41,18 @@ def fetch_review_html(url):
         return html_text
     return ""
 
-def review_html_to_text_list(html_text, lender_product_type, lender_name):
-    
+def parse_review_html(html_text):
     r_html = HTML(html=html_text)
     review_html = r_html.find(".lenderReviews")
-    parsed_reviews = review_html[0]
-    reviews = parsed_reviews.find(".mainReviews")
+    if review_html == -1:
+        return ""
+    review_body = review_html[0]
+    reviews = review_body.find(".mainReviews")
+    if reviews == -1:
+        return ""
+    return reviews
 
+def review_html_to_text_list(reviews, lender_product_type, lender_name):
     for review in reviews:
         review_fields = []
 
@@ -46,36 +60,54 @@ def review_html_to_text_list(html_text, lender_product_type, lender_name):
 
         review_fields.append(lender_product_type)
 
-        review_title = review.find(".reviewTitle")
+        review_fields.append(parse_review_title(review))
 
-        review_fields.append(review_title[0].text)
+        review_fields.append(parse_star_rating(review))
 
-        star_reviews = review.find(".starReviews")
-        stars_and_rec = star_reviews[0].text
+        review_fields.append(parse_review_text(review))
 
-        star_rec = stars_and_rec.split("stars")
+        name, address = parse_name_and_address(review)
 
-        review_fields.append(star_rec[0])
+        review_fields.append(name)
 
-        #fuck recommended
-        # review_fields.append(star_rec[1])
+        review_fields.append(address)
 
-        review_text = review.find(".reviewText")
-
-        review_fields.append(review_text[0].text)
-
-        consumer_name = review.find(".consumerName")
-        name_and_address = consumer_name[0].text
-        name_add = name_and_address.split("from ")
-
-        review_fields.append(name_add[0])
-        review_fields.append(name_add[1])
-
-        review_date = review.find(".consumerReviewDate")
-        review_fields.append(review_date[0].text)
+        review_fields.append(parse_review_date(review))
 
         review_list.append(review_fields)
 
-    df = pd.DataFrame(review_list, columns=review_headers)
-    r = df.to_dict()
-    return r
+    return review_list
+
+def parse_review_title(review):
+    review_title = review.find(".reviewTitle")
+    if review_title == -1:
+        return parse_text_error.format(field="Review Title")
+    return review_title[0].text
+
+def parse_star_rating(review):
+    star_reviews = review.find(".starReviews")
+    if star_reviews == -1:
+        return parse_text_error.format(field="Stars")
+    stars_and_rec = star_reviews[0].text
+    star_rec = stars_and_rec.split("stars")
+    return star_rec[0]
+
+def parse_review_text(review):
+    review_text = review.find(".reviewText")
+    if review_text == -1:
+        return parse_text_error.format(field="Review")
+    return review_text[0].text
+
+def parse_name_and_address(review):
+    consumer_name = review.find(".consumerName")
+    if consumer_name == -1:
+        return parse_text_error.format(field="Reviewer"), parse_text_error.format(field="Address")
+    name_and_address = consumer_name[0].text
+    name_add = name_and_address.split("from ")
+    return name_add[0], name_add[1]
+
+def parse_review_date(review):
+    review_date = review.find(".consumerReviewDate")
+    if review_date == -1:
+        return parse_text_error.format(field="Date")
+    return review_date[0].text
