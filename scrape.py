@@ -14,7 +14,7 @@ parse_html_error = "failed to parse the review html from the full scraped html"
 
 parse_text_error = "failed to parse text for field {field}"
 
-def get_review_page(lender_product_type, lender_name, lender_url_id,):
+def get_review_list(lender_product_type, lender_name, lender_url_id,):
     formated_url = url.format(loan_type=lender_product_type, lender=lender_name, lender_id=lender_url_id)
 
     html_text = fetch_review_html(formated_url)
@@ -103,7 +103,7 @@ def parse_name_and_address(review):
     if consumer_name == -1:
         return parse_text_error.format(field="Reviewer"), parse_text_error.format(field="Address")
     name_and_address = consumer_name[0].text
-    name_add = name_and_address.split("from ")
+    name_add = name_and_address.split(" from ")
     return name_add[0], name_add[1]
 
 def parse_review_date(review):
