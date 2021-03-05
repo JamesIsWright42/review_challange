@@ -6,28 +6,26 @@ url = "https://www.lendingtree.com/reviews/{loan_type}/{lender}/{lender_id}"
 
 review_list = []
 
-review_headers = ["Lender", "Loan Type", "Review Title", "Stars", "Review", "Reviewer", "Address", "Date"]
+review_headers = ["Review Title", "Stars", "Review", "Author", "Address", "Date"]
 
-fetch_html_error = "failed to scrape reviews with the submitted fields. Loan Type: {loan_type}, Lender: {lender}, Lender ID: {lender_id}"
+fetch_html_error = "failed to scrape reviews with the submitted url. URL: {url}"
 
 parse_html_error = "failed to parse the review html from the full scraped html"
 
 parse_text_error = "failed to parse text for field {field}"
 
-def get_review_list(lender_product_type, lender_name, lender_url_id,):
-    formated_url = url.format(loan_type=lender_product_type, lender=lender_name, lender_id=lender_url_id)
-
-    html_text = fetch_review_html(formated_url)
+def get_review_list(submitted_url):
+    html_text = fetch_review_html(submitted_url)
 
     if html_text == "":
-        return fetch_html_error.format(loan_type=lender_product_type, lender=lender_name, lender_id=lender_url_id)
+        return fetch_html_error.format(url=submitted_url)
 
     reviews = parse_review_html(html_text)
 
     if reviews == "":
         return parse_html_error
 
-    review_list = review_html_to_text_list(reviews, lender_product_type, lender_name)
+    review_list = review_html_to_text_list(reviews)
 
     df = pd.DataFrame(review_list, columns=review_headers)
     review_dict = df.to_dict()
@@ -52,13 +50,9 @@ def parse_review_html(html_text):
         return ""
     return reviews
 
-def review_html_to_text_list(reviews, lender_product_type, lender_name):
+def review_html_to_text_list(reviews):
     for review in reviews:
         review_fields = []
-
-        review_fields.append(lender_name)
-
-        review_fields.append(lender_product_type)
 
         review_fields.append(parse_review_title(review))
 
