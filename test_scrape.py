@@ -11,7 +11,7 @@ def test_fetch_review_html():
     test_url = "https://www.lendingtree.com/reviews/personal/first-midwest-bank/52903183"
     test_html = fetch_review_html(test_url)
 
-    assert len(test_html) == 270653
+    assert len(test_html) == 270810
 
 def test_parse_review_html():
     test_reviews = parse_review_html(test_html_resp)
